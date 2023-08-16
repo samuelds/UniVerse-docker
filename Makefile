@@ -1,9 +1,23 @@
-# Get user/group id
-UID := $(shell id -u)
-GID := $(shell id -g)
+# if vars not set specifially: try default to environment, else fixed value.
+# strip to ensure spaces are removed in future editorial mistakes.
+# tested to work consistently on popular Linux flavors and Mac.
+ifeq ($(user),)
+	# USER retrieved from env, UID from shell.
+	HOST_USER ?= $(strip $(if $(USER),$(USER),nodummy))
+	HOST_UID ?= $(strip $(if $(shell id -u),$(shell id -u),4000))
+else
+	# allow override by adding user= and/ or uid=  (lowercase!).
+	# uid= defaults to 0 if user= set (i.e. root).
+	HOST_USER = $(user)
+	HOST_UID = $(strip $(if $(uid),$(uid),0))
+endif
+
+# export such that its passed to shell functions for Docker to pick up.
+export HOST_USER
+export HOST_UID
 
 # Executables (local)
-DOCKER_COMP := UID=$(UID) GID=$(GID) docker compose
+DOCKER_COMP := docker compose
 
 # Docker containers
 SYMFONY_CONT = $(DOCKER_COMP) exec php
@@ -45,6 +59,7 @@ build: ## Builds the Docker images
 
 up: ## Start the docker hub in detached mode (no logs)
 	@$(DOCKER_COMP) -p "universe" up --detach
+	@echo "[info] current user: $(HOST_USER)(uid=$(HOST_UID))"
 	@echo "[ok] Web server listening on : http://localhost and https://localhost"
 
 start: build up ## Build and start the containers

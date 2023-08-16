@@ -5,8 +5,12 @@ services:
     web:
         container_name: web
         image: nginx:${DOCKER_NGINX_VERSION:-latest}-alpine
+        # Run with user priviliges by default.
+        user: ${HOST_USER:-nodummy}
+        # These variables are passed into the container.
         environment:
             TZ: ${DOCKER_TZ:-Europe/Paris}
+            UID: ${HOST_UID:-4000}
         volumes:
             - ./files/nginx/sites-enabled:/etc/nginx/sites-enabled
             - ./files/nginx/conf.d/file-upload.conf:/etc/nginx/conf.d/file-upload.conf
@@ -27,15 +31,21 @@ services:
 
     php:
         container_name: php
-        user: ${UID}:${GID}
         build:
             context: .
             dockerfile: files/php/Dockerfile
             target: fpm
+            # These variables are passed to Dockerfile.
             args:
                 PHP_VERSION: ${DOCKER_PHP_VERSION:-8.2}
+                HOST_UID: ${HOST_UID:-4000}
+                HOST_USER: ${HOST_USER:-nodummy}
+        # Run with user priviliges by default.
+        user: ${HOST_USER:-nodummy}
+        # These variables are passed into the container.
         environment:
             TZ: ${DOCKER_TZ:-Europe/Paris}
+            UID: ${HOST_UID:-4000}
         volumes:
             - ${NGINX_APP:-./app}:/var/www/app
             - ./logs/php:/var/log/php
@@ -49,14 +59,17 @@ services:
 
     database:
         container_name: database
-        user: ${UID}:${GID}
         image: mariadb:${DOCKER_MARIADB_VERSION:-latest}
+        # Run with user priviliges by default.
+        user: ${HOST_USER:-nodummy}
+        # These variables are passed into the container.
         environment:
             MYSQL_ROOT_PASSWORD: ${DOCKER_MARIADB_ROOT_PASSWORD:-root}
             MYSQL_DATABASE: ${DOCKER_MARIADB_DATABASE:-app}
             MYSQL_USER: ${DOCKER_MARIADB_USER:-app}
             MYSQL_PASSWORD: ${DOCKER_MARIADB_PASSWORD:-app}
             TZ: ${DOCKER_TZ:-Europe/Paris}
+            UID: ${HOST_UID:-4000}
         volumes:
             - ./data/mariadb:/var/lib/mysql
             - ./logs/mariadb:/var/log/mysql
@@ -67,13 +80,18 @@ services:
 
     composer:
         container_name: composer
-        user: ${UID}:${GID}
+        # Run with user priviliges by default.
+        user: ${HOST_USER:-nodummy}
         build:
             context: .
             dockerfile: files/php/Dockerfile
             target: composer
+            # These variables are passed to Dockerfile.
             args:
                 PHP_VERSION: ${DOCKER_PHP_VERSION:-8.2}
+                HOST_UID: ${HOST_UID:-4000}
+                HOST_USER: ${HOST_USER:-nodummy}
+        # These variables are passed into the container.
         environment:
             TZ: ${DOCKER_TZ:-Europe/Paris}
         volumes:
@@ -92,8 +110,10 @@ services:
 
     node:
         container_name: node
-        user: ${UID}:${GID}
+        # Run with user priviliges by default.
+        user: ${HOST_USER:-nodummy}
         image: node:${DOCKER_NODE_VERSION:-14}-alpine
+        # These variables are passed into the container.
         environment:
             TZ: ${DOCKER_TZ:-Europe/Paris}
         volumes:
@@ -102,8 +122,10 @@ services:
 
     mailer:
         container_name: mailer
-        user: ${UID}:${GID}
+        # Run with user priviliges by default.
+        user: ${HOST_USER:-nodummy}
         image: schickling/mailcatcher
+        # These variables are passed into the container.
         environment:
             TZ: ${DOCKER_TZ:-Europe/Paris}
         ports:
