@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+
+    web:
+        container_name: web
+        image: nginx:${DOCKER_NGINX_VERSION:-latest}-alpine
+        environment:
+            TZ: ${DOCKER_TZ:-Europe/Paris}
+        volumes:
+            - ./files/nginx/sites-enabled:/etc/nginx/sites-enabled
+            - ./files/nginx/conf.d/file-upload.conf:/etc/nginx/conf.d/file-upload.conf
+            - ./files/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+            - ./files/nginx/conf.d/sites-enabled.conf:/etc/nginx/conf.d/sites-enabled.conf
+            - ./files/nginx/html:/var/www/html
+            - ./files/nginx/ssl:/etc/nginx/ssl
+            - ./var/log/nginx:/var/log/nginx
+            - ${NGINX_APP:-./app}:/var/www/app
+        ports:
+            - ${DOCKER_NGINX_PORT:-80}:80
+            - ${DOCKER_NGINX_SSL_PORT:-443}:443
+        depends_on:
+            - php
+            - database
+        networks:
+            - backend
+
+    php:
+        container_name: php
+        user: ${UID}:${GID}
+        build:
+            context: .
+            dockerfile: files/php/Dockerfile
+            target: fpm
+            args:
+                PHP_VERSION: ${DOCKER_PHP_VERSION:-8.2}
+        environment:
+            TZ: ${DOCKER_TZ:-Europe/Paris}
+        volumes:
+            - ${NGINX_APP:-./app}:/var/www/app
+            - ./var/log/php:/var/log/php
+            - ./files/php/conf.d/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini
+            - ./files/php/conf.d/timezone.ini:/usr/local/etc/php/conf.d/timezone.ini
+        working_dir: /var/www/app
+        depends_on:
+            - database
+        networks:
+            - backend
+
+    database:
+        container_name: database
+        user: ${UID}:${GID}
+        image: mariadb:${DOCKER_MARIADB_VERSION:-latest}
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DOCKER_MARIADB_ROOT_PASSWORD:-root}
+            MYSQL_DATABASE: ${DOCKER_MARIADB_DATABASE:-app}
+            MYSQL_USER: ${DOCKER_MARIADB_USER:-app}
+            MYSQL_PASSWORD: ${DOCKER_MARIADB_PASSWORD:-app}
+            TZ: ${DOCKER_TZ:-Europe/Paris}
+        volumes:
+            - ./data/mariadb:/var/lib/mysql
+            - ./var/log/mariadb:/var/log/mysql
+        ports:
+            - ${DOCKER_MARIADB_PORT:-3306}:3306
+        networks:
+            - backend
+
+    composer:
+        container_name: composer
+        user: ${UID}:${GID}
+        build:
+            context: .
+            dockerfile: files/php/Dockerfile
+            target: composer
+            args:
+                PHP_VERSION: ${DOCKER_PHP_VERSION:-8.2}
+        environment:
+            TZ: ${DOCKER_TZ:-Europe/Paris}
+        volumes:
+            - ${NGINX_APP:-./app}:/var/www/app
+            - ./var/log/php-composer:/var/log/php
+            - ./files/php/conf.d/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini
+            - ./files/php/conf.d/timezone.ini:/usr/local/etc/php/conf.d/timezone.ini
+        working_dir: /var/www/app
+
+#    whoami-one:
+#        image: containous/whoami
+#        environment:
+#            - VIRTUAL_HOST=${DOCKER_WHOAMI_ONE_HOST:-whoami-one.localhost}
+#        networks:
+#            - backend
+
+    node:
+        container_name: node
+        user: ${UID}:${GID}
+        image: node:${DOCKER_NODE_VERSION:-14}-alpine
+        environment:
+            TZ: ${DOCKER_TZ:-Europe/Paris}
+        volumes:
+            - ${NGINX_APP:-./app}:/var/www/app
+        working_dir: /var/www/app
+
+    mailer:
+        container_name: mailer
+        user: ${UID}:${GID}
+        image: schickling/mailcatcher
+        environment:
+            TZ: ${DOCKER_TZ:-Europe/Paris}
+        ports:
+            - 1025:1025
+            - 1080:1080
+        networks:
+            - backend
+
+networks:
+    backend:
+        driver: bridge
