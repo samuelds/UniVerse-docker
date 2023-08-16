@@ -44,7 +44,7 @@ build: ## Builds the Docker images
 	@$(DOCKER_COMP) build --pull --no-cache
 
 up: ## Start the docker hub in detached mode (no logs)
-	@$(DOCKER_COMP) up --detach
+	@$(DOCKER_COMP) -p "universe" up --detach
 	@echo "[ok] Web server listening on : http://localhost and https://localhost"
 
 start: build up ## Build and start the containers

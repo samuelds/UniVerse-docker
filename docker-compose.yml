@@ -14,7 +14,7 @@ services:
             - ./files/nginx/conf.d/sites-enabled.conf:/etc/nginx/conf.d/sites-enabled.conf
             - ./files/nginx/html:/var/www/html
             - ./files/nginx/ssl:/etc/nginx/ssl
-            - ./var/log/nginx:/var/log/nginx
+            - ./logs/nginx:/var/log/nginx
             - ${NGINX_APP:-./app}:/var/www/app
         ports:
             - ${DOCKER_NGINX_PORT:-80}:80
@@ -38,7 +38,7 @@ services:
             TZ: ${DOCKER_TZ:-Europe/Paris}
         volumes:
             - ${NGINX_APP:-./app}:/var/www/app
-            - ./var/log/php:/var/log/php
+            - ./logs/php:/var/log/php
             - ./files/php/conf.d/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini
             - ./files/php/conf.d/timezone.ini:/usr/local/etc/php/conf.d/timezone.ini
         working_dir: /var/www/app
@@ -59,7 +59,7 @@ services:
             TZ: ${DOCKER_TZ:-Europe/Paris}
         volumes:
             - ./data/mariadb:/var/lib/mysql
-            - ./var/log/mariadb:/var/log/mysql
+            - ./logs/mariadb:/var/log/mysql
         ports:
             - ${DOCKER_MARIADB_PORT:-3306}:3306
         networks:
@@ -78,7 +78,7 @@ services:
             TZ: ${DOCKER_TZ:-Europe/Paris}
         volumes:
             - ${NGINX_APP:-./app}:/var/www/app
-            - ./var/log/php-composer:/var/log/php
+            - ./logs/composer:/var/log/php
             - ./files/php/conf.d/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini
             - ./files/php/conf.d/timezone.ini:/usr/local/etc/php/conf.d/timezone.ini
         working_dir: /var/www/app
