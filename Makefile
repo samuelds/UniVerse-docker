@@ -1,14 +1,14 @@
 # Set user and group id
 ifeq ($(OS),Windows_NT)
-	UID := 1000
-	GID := 1000
+	HOST_UID := "1000"
+	HOST_GID := "1000"
 else
-	UID := $(shell id -u)
-	GID := $(shell id -g)
+	HOST_UID := $(shell id -u)
+	HOST_GID := $(shell id -g)
 endif
 
 # Executables (local)
-DOCKER_COMP := UID=$(UID) GID=$(GID) docker compose -p "universe"
+DOCKER_COMP := HOST_UID=$(HOST_UID) HOST_GID=$(HOST_GID) docker compose -p "universe"
 
 # Docker containers
 PHP_CONT = $(DOCKER_COMP) exec php
@@ -52,11 +52,12 @@ help: ## Outputs this help screen
 
 ## —— Docker 🐳 ————————————————————————————————————————————————————————————————
 build: ## Builds the Docker images
+	@echo "[info] current user: $(UID):$(GID)"
 	@$(DOCKER_COMP) build --pull --no-cache
 
 up: ## Start the docker hub in detached mode (no logs)
-	@$(DOCKER_COMP) up --detach
 	@echo "[info] current user: $(UID):$(GID)"
+	@$(DOCKER_COMP) up --detach
 	@echo "[ok] Web server listening on : http://localhost and https://localhost"
 
 start: build up ## Build and start the containers
