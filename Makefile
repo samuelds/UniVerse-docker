@@ -52,11 +52,11 @@ help: ## Outputs this help screen
 
 ## —— Docker 🐳 ————————————————————————————————————————————————————————————————
 build: ## Builds the Docker images
-	@echo "[info] current user: $(UID):$(GID)"
+	@echo "[info] current user: $(HOST_UID):$(HOST_UID)"
 	@$(DOCKER_COMP) build --pull --no-cache
 
 up: ## Start the docker hub in detached mode (no logs)
-	@echo "[info] current user: $(UID):$(GID)"
+	@echo "[info] current user: $(HOST_UID):$(HOST_UID)"
 	@$(DOCKER_COMP) up --detach
 	@echo "[ok] Web server listening on : http://localhost and https://localhost"
 
