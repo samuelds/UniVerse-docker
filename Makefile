@@ -1,23 +1,9 @@
-# if vars not set specifially: try default to environment, else fixed value.
-# strip to ensure spaces are removed in future editorial mistakes.
-# tested to work consistently on popular Linux flavors and Mac.
-ifeq ($(user),)
-	# USER retrieved from env, UID from shell.
-	HOST_USER ?= $(strip $(if $(USER),$(USER),nodummy))
-	HOST_UID ?= $(strip $(if $(shell id -u),$(shell id -u),4000))
-else
-	# allow override by adding user= and/ or uid=  (lowercase!).
-	# uid= defaults to 0 if user= set (i.e. root).
-	HOST_USER = $(user)
-	HOST_UID = $(strip $(if $(uid),$(uid),0))
-endif
-
-# export such that its passed to shell functions for Docker to pick up.
-export HOST_USER
-export HOST_UID
+# Set user and group id
+UID := $(shell id -u)
+GID := $(shell id -g)
 
 # Executables (local)
-DOCKER_COMP := docker compose
+DOCKER_COMP := UID=$(UID) GID=$(GID) docker compose -p "universe"
 
 # Docker containers
 SYMFONY_CONT = $(DOCKER_COMP) exec php
@@ -58,8 +44,8 @@ build: ## Builds the Docker images
 	@$(DOCKER_COMP) build --pull --no-cache
 
 up: ## Start the docker hub in detached mode (no logs)
-	@$(DOCKER_COMP) -p "universe" up --detach
-	@echo "[info] current user: $(HOST_USER)(uid=$(HOST_UID))"
+	@$(DOCKER_COMP) up --detach
+	@echo "[info] current user: $(UID):$(GID)"
 	@echo "[ok] Web server listening on : http://localhost and https://localhost"
 
 start: build up ## Build and start the containers

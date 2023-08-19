@@ -1,16 +1,14 @@
-version: '3.8'
+version: "3.8"
 
 services:
-
     web:
         container_name: web
         image: nginx:${DOCKER_NGINX_VERSION:-latest}-alpine
-        # Run with user priviliges by default.
-        user: ${HOST_USER:-nodummy}
         # These variables are passed into the container.
         environment:
             TZ: ${DOCKER_TZ:-Europe/Paris}
-            UID: ${HOST_UID:-4000}
+            UID: ${HOST_UID:-1000}
+            GID: ${HOST_GID:-1000}
         volumes:
             - ./files/nginx/sites-enabled:/etc/nginx/sites-enabled
             - ./files/nginx/conf.d/file-upload.conf:/etc/nginx/conf.d/file-upload.conf
@@ -38,14 +36,15 @@ services:
             # These variables are passed to Dockerfile.
             args:
                 PHP_VERSION: ${DOCKER_PHP_VERSION:-8.2}
-                HOST_UID: ${HOST_UID:-4000}
-                HOST_USER: ${HOST_USER:-nodummy}
+                UID: ${HOST_UID:-1000}
+                GID: ${HOST_GID:-1000}
         # Run with user priviliges by default.
-        user: ${HOST_USER:-nodummy}
+        user: "${HOST_UID:-1000}:${HOST_GID-1000}"
         # These variables are passed into the container.
         environment:
             TZ: ${DOCKER_TZ:-Europe/Paris}
-            UID: ${HOST_UID:-4000}
+            UID: ${HOST_UID:-1000}
+            GID: ${HOST_GID:-1000}
         volumes:
             - ${NGINX_APP:-./app}:/var/www/app
             - ./logs/php:/var/log/php
@@ -61,7 +60,7 @@ services:
         container_name: database
         image: mariadb:${DOCKER_MARIADB_VERSION:-latest}
         # Run with user priviliges by default.
-        user: ${HOST_USER:-nodummy}
+        # user: ${HOST_USER:-www-data}
         # These variables are passed into the container.
         environment:
             MYSQL_ROOT_PASSWORD: ${DOCKER_MARIADB_ROOT_PASSWORD:-root}
@@ -69,7 +68,8 @@ services:
             MYSQL_USER: ${DOCKER_MARIADB_USER:-app}
             MYSQL_PASSWORD: ${DOCKER_MARIADB_PASSWORD:-app}
             TZ: ${DOCKER_TZ:-Europe/Paris}
-            UID: ${HOST_UID:-4000}
+            UID: ${HOST_UID:-1000}
+            GID: ${HOST_GID:-1000}
         volumes:
             - ./data/mariadb:/var/lib/mysql
             - ./logs/mariadb:/var/log/mysql
@@ -81,7 +81,7 @@ services:
     composer:
         container_name: composer
         # Run with user priviliges by default.
-        user: ${HOST_USER:-nodummy}
+        user: "${HOST_UID:-1000}:${HOST_GID-1000}"
         build:
             context: .
             dockerfile: files/php/Dockerfile
@@ -89,11 +89,13 @@ services:
             # These variables are passed to Dockerfile.
             args:
                 PHP_VERSION: ${DOCKER_PHP_VERSION:-8.2}
-                HOST_UID: ${HOST_UID:-4000}
-                HOST_USER: ${HOST_USER:-nodummy}
+                UID: ${HOST_UID:-1000}
+                GID: ${HOST_GID:-1000}
         # These variables are passed into the container.
         environment:
             TZ: ${DOCKER_TZ:-Europe/Paris}
+            UID: ${HOST_UID:-1000}
+            GID: ${HOST_GID:-1000}
         volumes:
             - ${NGINX_APP:-./app}:/var/www/app
             - ./logs/composer:/var/log/php
@@ -101,21 +103,23 @@ services:
             - ./files/php/conf.d/timezone.ini:/usr/local/etc/php/conf.d/timezone.ini
         working_dir: /var/www/app
 
-#    whoami-one:
-#        image: containous/whoami
-#        environment:
-#            - VIRTUAL_HOST=${DOCKER_WHOAMI_ONE_HOST:-whoami-one.localhost}
-#        networks:
-#            - backend
+    #    whoami-one:
+    #        image: containous/whoami
+    #        environment:
+    #            - VIRTUAL_HOST=${DOCKER_WHOAMI_ONE_HOST:-whoami-one.localhost}
+    #        networks:
+    #            - backend
 
     node:
         container_name: node
         # Run with user priviliges by default.
-        user: ${HOST_USER:-nodummy}
+        user: "${HOST_UID:-1000}:${HOST_GID-1000}"
         image: node:${DOCKER_NODE_VERSION:-14}-alpine
         # These variables are passed into the container.
         environment:
             TZ: ${DOCKER_TZ:-Europe/Paris}
+            UID: ${HOST_UID:-1000}
+            GID: ${HOST_GID:-1000}
         volumes:
             - ${NGINX_APP:-./app}:/var/www/app
         working_dir: /var/www/app
@@ -123,7 +127,7 @@ services:
     mailer:
         container_name: mailer
         # Run with user priviliges by default.
-        user: ${HOST_USER:-nodummy}
+        #user: ${HOST_USER:-www-data}
         image: schickling/mailcatcher
         # These variables are passed into the container.
         environment:
