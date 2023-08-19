@@ -1,15 +1,20 @@
 # Set user and group id
-UID := $(shell id -u)
-GID := $(shell id -g)
+ifeq ($(OS),Windows_NT)
+	UID := 1000
+	GID := 1000
+else
+	UID := $(shell id -u)
+	GID := $(shell id -g)
+endif
 
 # Executables (local)
 DOCKER_COMP := UID=$(UID) GID=$(GID) docker compose -p "universe"
 
 # Docker containers
+PHP_CONT = $(DOCKER_COMP) exec php
 SYMFONY_CONT = $(DOCKER_COMP) exec php
 COMPOSER_CONT = $(DOCKER_COMP) run --rm composer
 NODE_CONT = $(DOCKER_COMP) run --rm node
-PHP_CONT = $(DOCKER_COMP) exec php
 
 # Executables
 PHP      = $(PHP_CONT) php
@@ -27,10 +32,16 @@ install: ## Copy files
 install: ssl
 	@cp .env.dist .env
 	@echo "[ok] Env file"
+	
+ifeq ($(OS),Windows_NT)
+    SSL_CMD := powershell -Command "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./files/nginx/ssl/localhost.key -out ./files/nginx/ssl/localhost.crt -subj \"/C=FR/ST=Paris/L=Paris/O=42/OU=42/CN=localhost\""
+else
+    SSL_CMD := openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./files/nginx/ssl/localhost.key -out ./files/nginx/ssl/localhost.crt -subj "/C=FR/ST=Paris/L=Paris/O=42/OU=42/CN=localhost"
+endif
 
 ## Nginx
 ssl: ## Generate https certificate for domaine
-	@openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./files/nginx/ssl/localhost.key -out ./files/nginx/ssl/localhost.crt -subj "/C=FR/ST=Paris/L=Paris/O=42/OU=42/CN=localhost"
+	@$(SSL_CMD)
 	@echo "[ok] SSL certificate generated"
 	@$(DOCKER_COMP) restart web
 	@echo "[ok] Web server listening on : http://localhost and https://localhost"

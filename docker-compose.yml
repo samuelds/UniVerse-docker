@@ -3,7 +3,7 @@ version: "3.8"
 services:
     web:
         container_name: web
-        image: nginx:${DOCKER_NGINX_VERSION:-latest}-alpine
+        image: nginx:${DOCKER_NGINX_VERSION:-1.24}-alpine
         # These variables are passed into the container.
         environment:
             TZ: ${DOCKER_TZ:-Europe/Paris}
@@ -58,7 +58,7 @@ services:
 
     database:
         container_name: database
-        image: mariadb:${DOCKER_MARIADB_VERSION:-latest}
+        image: mariadb:${DOCKER_MARIADB_VERSION:-10.11}
         # Run with user priviliges by default.
         # user: ${HOST_USER:-www-data}
         # These variables are passed into the container.
@@ -114,7 +114,7 @@ services:
         container_name: node
         # Run with user priviliges by default.
         user: "${HOST_UID:-1000}:${HOST_GID-1000}"
-        image: node:${DOCKER_NODE_VERSION:-14}-alpine
+        image: node:${DOCKER_NODE_VERSION:-16}-alpine
         # These variables are passed into the container.
         environment:
             TZ: ${DOCKER_TZ:-Europe/Paris}
