@@ -103,13 +103,6 @@ services:
             - ./files/php/conf.d/timezone.ini:/usr/local/etc/php/conf.d/timezone.ini
         working_dir: /var/www/app
 
-    #    whoami-one:
-    #        image: containous/whoami
-    #        environment:
-    #            - VIRTUAL_HOST=${DOCKER_WHOAMI_ONE_HOST:-whoami-one.localhost}
-    #        networks:
-    #            - backend
-
     node:
         container_name: node
         # Run with user priviliges by default.
@@ -137,6 +130,11 @@ services:
             - 1080:1080
         networks:
             - backend
+
+    whoami-one:
+        image: containous/whoami
+        environment:
+            - VIRTUAL_HOST=${DOCKER_NGINX_URL:-app.dev.localhost}
 
 networks:
     backend:
