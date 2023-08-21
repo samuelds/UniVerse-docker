@@ -1,3 +1,7 @@
+# Ignore IDE files
+.idea/*
+
+# Ignore env file and personal data
 .env
 app/*
 logs/*
