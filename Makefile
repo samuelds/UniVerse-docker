@@ -18,7 +18,7 @@ NODE_CONT = $(DOCKER_COMP) run --rm node
 
 # Executables
 PHP      = $(PHP_CONT) php
-SYMFONY  = $(SYMFONY_CONT) bin/console
+SYMFONY  = $(SYMFONY_CONT) php bin/console
 COMPOSER = $(COMPOSER_CONT) composer
 YARN     = $(NODE_CONT) yarn
 NPM		 = $(NODE_CONT) npm
