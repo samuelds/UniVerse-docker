@@ -106,6 +106,12 @@ sf: ## List all Symfony commands or pass the parameter "c=" to run a given comma
 cc: c=c:c ## Clear the cache
 cc: sf
 
+entity: ## Create a new entity
+	@$(SYMFONY) make:entity
+
+controller: ## Create a new controller
+	@$(SYMFONY) make:controller
+
 migration: ## Create a new migration
 	@$(SYMFONY) make:migration
 
