@@ -58,7 +58,7 @@ build: ## Builds the Docker images
 up: ## Start the docker hub in detached mode (no logs)
 	@echo "[info] current user: $(HOST_UID):$(HOST_UID)"
 	@$(DOCKER_COMP) up --detach
-	@echo "[ok] Web server listening on : http://localhost and https://localhost"
+	@echo "[ok] Web server listening on : http://app.dev.local and https://app.dev.local"
 
 start: build up ## Build and start the containers
 
