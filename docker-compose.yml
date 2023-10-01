@@ -131,11 +131,6 @@ services:
         networks:
             - backend
 
-    whoami-one:
-        image: containous/whoami
-        environment:
-            - VIRTUAL_HOST=${DOCKER_NGINX_URL:-app.dev.localhost}
-
 networks:
     backend:
         driver: bridge

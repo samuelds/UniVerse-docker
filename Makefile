@@ -103,8 +103,8 @@ sf: ## List all Symfony commands or pass the parameter "c=" to run a given comma
 	@$(eval c ?=)
 	@$(SYMFONY) $(c)
 
-cc: c=c:c ## Clear the cache
-cc: sf
+cc: ## Clear the cache
+	@$(SYMFONY) cache:clear
 
 entity: ## Create a new entity
 	@$(SYMFONY) make:entity
